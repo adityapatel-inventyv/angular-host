@@ -1,6 +1,6 @@
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, timer } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +12,12 @@ export class TestingService {
     isOnline: navigator.onLine,
     ip: ''
   });
-
   private socket$!: WebSocketSubject<any>;
   private connectionStatus = new Subject<boolean>();
+  private heartbeatInterval: any;
+  private maxRetries = 10;
+  private retryDelay = 2000; // Initial retry delay in ms
+  private retryAttempts = 0;
 
   constructor() {
     this.connectWebSocket();
@@ -34,14 +37,44 @@ export class TestingService {
     this.socket$ = webSocket({
       url: url,
       openObserver: {
-        next: () => this.connectionStatus.next(true),
+        next: () => {
+          this.connectionStatus.next(true);
+          this.retryAttempts = 0; // Reset retries on successful connection
+          clearInterval(this.heartbeatInterval);
+        },
       },
       closeObserver: {
-        next: () => this.connectionStatus.next(false),
+        next: () => {
+          this.connectionStatus.next(false);
+          this.retryWebSocket();
+        },
       }
     });
 
-    this.socket$.subscribe();
+    this.socket$.subscribe({
+      error: () => {
+        this.retryWebSocket(); // Retry on error
+      }
+    });
+  }
+
+  private retryWebSocket(): void {
+    if (this.retryAttempts >= this.maxRetries) {
+      console.error('Max retry attempts reached. WebSocket connection failed.');
+      return;
+    }
+
+    const delay = this.calculateRetryDelay();
+    console.log(`Retrying WebSocket connection in ${delay}ms (Attempt ${this.retryAttempts + 1}/${this.maxRetries})`);
+
+    timer(delay).subscribe(() => {
+      this.retryAttempts++;
+      this.connectWebSocket();
+    });
+  }
+
+  private calculateRetryDelay(): number {
+    return this.retryDelay * Math.pow(2, this.retryAttempts); // Exponential backoff
   }
 
   // Emit network type updates
