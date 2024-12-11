@@ -1,0 +1,23 @@
+<div class="container">
+  <h1>Network and IP Tracker</h1>
+
+  <!-- Network Type -->
+  <div class="status-box">
+    <p><strong>Current Network Type:</strong> {{ networkType }}</p>
+  </div>
+
+  <!-- Online Status -->
+  <div class="status-box">
+    <h2>Status: {{ isOnline ? 'Online 🎉' : 'Offline ⚠️' }}</h2>
+  </div>
+
+  <!-- WebSocket Connection -->
+  <div class="status-box">
+    <h2>WebSocket Connection: {{ isConnected ? 'Connected ✅' : 'Disconnected ❌' }}</h2>
+  </div>
+
+  <!-- IP Change Message -->
+  <div class="status-box">
+    <p><strong>IP Status:</strong> {{ ipChangeMessage }}</p>
+  </div>
+</div>
