@@ -22,13 +22,13 @@ export class AppComponent implements OnInit, OnDestroy {
   currentWebSocketIP: string | null = null;
   webSocketIPChangeMessage: string | null = null;
 
-  temparray:any=[];
+  temparray: any = [];
 
   private connectionSubscription!: Subscription;
   private onlineStatusSubscription!: Subscription;
   private networkTypeSubscription!: Subscription;
-  navigatorIsOnlineLogs: any=[]
-  webSocketLogs: any=[]
+  navigatorIsOnlineLogs: any = []
+  webSocketLogs: any = []
 
   constructor(private networkService: TestingService) { }
 
@@ -47,16 +47,37 @@ export class AppComponent implements OnInit, OnDestroy {
     // Subscribe to online status changes
     this.onlineStatusSubscription = this.networkService.onlineStatus$.subscribe(status => {
       this.isOnline = status.isOnline;
-      this.currentIP = status.ip;
-      this.navigatorIsOnlineLogs=status;
-      
-      if (!this.isOnline) {
+      this.navigatorIsOnlineLogs.push(status);
+
+
+      // if (!this.isOnline) {
+      //   this.ipChangeMessage = 'You are offline.';
+      // } else if (this.previousIP && this.currentIP && this.previousIP !== this.currentIP) {
+      //   this.ipChangeMessage = `IP changed! Previous: ${this.previousIP}, Current: ${this.currentIP}`;
+      //   this.previousIP = this.currentIP; // Update for next comparison
+      // } else {
+      //   this.ipChangeMessage = `IP remains the same: ${this.currentIP}`;
+      // }
+
+
+      if (this.isOnline) {
+        this.fetchPublicIP().then(ip => {
+          this.currentIP = ip;
+
+        if (this.previousIP && this.currentIP && this.previousIP !== this.currentIP) {
+          this.ipChangeMessage = `IP changed! Previous: ${this.previousIP}, Current: ${this.currentIP}`;
+          this.previousIP = this.currentIP; // Update for next comparison
+        }
+        else {
+          this.ipChangeMessage = `IP remains the same: ${this.currentIP}`;
+
+        }
+        });
+
+      }
+      else {
         this.ipChangeMessage = 'You are offline.';
-      } else if (this.previousIP && this.currentIP && this.previousIP !== this.currentIP) {
-        this.ipChangeMessage = `IP changed! Previous: ${this.previousIP}, Current: ${this.currentIP}`;
-        this.previousIP = this.currentIP; // Update for next comparison
-      } else {
-        this.ipChangeMessage = `IP remains the same: ${this.currentIP}`;
+
       }
     });
 
@@ -95,11 +116,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
 
-  click(){
+  click() {
 
 
     this.networkService.sendMessage();
-    
+
   }
   ngOnDestroy() {
     if (this.connectionSubscription) {

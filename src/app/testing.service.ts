@@ -8,7 +8,7 @@ import { BehaviorSubject, Subject, timer } from 'rxjs';
 export class TestingService {
   private connection = (navigator as any).connection || null;
   private networkTypeSubject = new BehaviorSubject<string>(this.getCurrentNetworkType());
-  private onlineStatusSubject = new BehaviorSubject<{ isOnline: boolean; ip: string }>({
+  private onlineStatusSubject = new BehaviorSubject<any>({
     isOnline: navigator.onLine,
     ip: ''
   });
@@ -101,8 +101,8 @@ export class TestingService {
   // Emit online/offline status with public IP
   private async updateOnlineStatus(): Promise<void> {
     const isOnline = navigator.onLine;
-    const ip = isOnline ? await this.fetchPublicIP() : '';
-    this.onlineStatusSubject.next({ isOnline, ip });
+    // const ip = isOnline ? await this.fetchPublicIP() : '';
+    this.onlineStatusSubject.next(isOnline );
   }
 
   private async fetchPublicIP(): Promise<string> {
