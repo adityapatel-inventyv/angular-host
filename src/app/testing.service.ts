@@ -18,6 +18,7 @@ export class TestingService {
   private maxRetries = 10;
   private retryDelay = 2000; // Initial retry delay in ms
   private retryAttempts = 0;
+  private isRetrying = false; // Tracks if a retry is in progress
 
   constructor() {
     this.connectWebSocket();
@@ -40,6 +41,7 @@ export class TestingService {
         next: () => {
           this.connectionStatus.next(true);
           this.retryAttempts = 0; // Reset retries on successful connection
+          this.isRetrying = false; // Clear retrying flag
           clearInterval(this.heartbeatInterval);
         },
       },
@@ -59,11 +61,16 @@ export class TestingService {
   }
 
   private retryWebSocket(): void {
+    if (this.isRetrying) {
+      return; // Prevent multiple retry attempts simultaneously
+    }
+
     if (this.retryAttempts >= this.maxRetries) {
       console.error('Max retry attempts reached. WebSocket connection failed.');
       return;
     }
 
+    this.isRetrying = true; // Set retrying flag
     const delay = this.calculateRetryDelay();
     console.log(`Retrying WebSocket connection in ${delay}ms (Attempt ${this.retryAttempts + 1}/${this.maxRetries})`);
 
@@ -116,13 +123,11 @@ export class TestingService {
     return this.connectionStatus.asObservable();
   }
 
-
   sendMessage() {
-
     this.connectionStatus.next(false);
     this.retryWebSocket();
-
   }
+
   closeConnection() {
     if (this.socket$) {
       this.socket$.complete();
