@@ -105,13 +105,13 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async fetchPublicIP(): Promise<string> {
+  private async fetchPublicIP(): Promise<any> {
     try {
       const response = await fetch('https://api.ipify.org?format=json');
       const data = await response.json();
       return data.ip;
     } catch {
-      return 'Unknown';
+      alert('Unknown');
     }
   }
 
