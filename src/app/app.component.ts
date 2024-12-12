@@ -34,9 +34,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Fetch initial IP
-    this.fetchPublicIP().then(ip => {
-      this.previousIP = ip;
-      this.previousWebSocketIP = ip;
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {  
+        this.previousIP = data.ip;
+        this.previousWebSocketIP = data.ip;
     });
 
     // Subscribe to network type changes
@@ -61,8 +63,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
       if (this.isOnline) {
-        this.fetchPublicIP().then(ip => {
-          this.currentIP = ip;
+        fetch('https://api.ipify.org?format=json')
+          .then(res => res.json())
+          .then(data => {  
+            this.currentIP = data.ip;
 
         if (this.previousIP && this.currentIP && this.previousIP !== this.currentIP) {
           this.ipChangeMessage = `IP changed! Previous: ${this.previousIP}, Current: ${this.currentIP}`;
@@ -89,8 +93,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
       if (this.isConnected) {
         // Fetch new WebSocket IP when connected
-        this.fetchPublicIP().then(ip => {
-          this.currentWebSocketIP = ip;
+        fetch('https://api.ipify.org?format=json')
+          .then(res => res.json())
+          .then(data => {  
+            this.currentWebSocketIP = data.ip;
 
           if (this.previousWebSocketIP && this.currentWebSocketIP && this.previousWebSocketIP !== this.currentWebSocketIP) {
             this.webSocketIPChangeMessage = `WebSocket IP changed! Previous: ${this.previousWebSocketIP}, Current: ${this.currentWebSocketIP}`;
@@ -106,13 +112,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private async fetchPublicIP(): Promise<any> {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip;
-    } catch {
-      alert('Unknown');
-    }
+    
+   
+    
   }
 
 
