@@ -11,13 +11,19 @@
     <h2>Status: {{ isOnline ? 'Online 🎉' : 'Offline ⚠️' }}</h2>
   </div>
 
+  <!-- General IP Status -->
+  <div class="status-box">
+    <p><strong>IP Status:</strong> {{ ipChangeMessage }}</p>
+  </div>
+
+  <!-- WebSocket IP Status -->
+
+
   <!-- WebSocket Connection -->
   <div class="status-box">
     <h2>WebSocket Connection: {{ isConnected ? 'Connected ✅' : 'Disconnected ❌' }}</h2>
   </div>
-
-  <!-- IP Change Message -->
-  <div class="status-box">
-    <p><strong>IP Status:</strong> {{ ipChangeMessage }}</p>
-  </div>
+    <div class="status-box">
+      <p><strong>WebSocket IP Status:</strong> {{ webSocketIPChangeMessage }}</p>
+    </div>
 </div>
