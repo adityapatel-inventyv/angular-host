@@ -116,6 +116,13 @@ export class TestingService {
     return this.connectionStatus.asObservable();
   }
 
+
+  sendMessage() {
+
+    this.connectionStatus.next(false);
+    this.retryWebSocket();
+
+  }
   closeConnection() {
     if (this.socket$) {
       this.socket$.complete();

@@ -22,6 +22,8 @@ export class AppComponent implements OnInit, OnDestroy {
   currentWebSocketIP: string | null = null;
   webSocketIPChangeMessage: string | null = null;
 
+  temparray:any=[];
+
   private connectionSubscription!: Subscription;
   private onlineStatusSubscription!: Subscription;
   private networkTypeSubscription!: Subscription;
@@ -58,6 +60,9 @@ export class AppComponent implements OnInit, OnDestroy {
     // Subscribe to WebSocket connection status
     this.connectionSubscription = this.networkService.getConnectionStatus().subscribe(status => {
       this.isConnected = status;
+      this.temparray.push(status);
+console.log(status);
+
 
       if (this.isConnected) {
         // Fetch new WebSocket IP when connected
@@ -87,6 +92,13 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+
+  click(){
+
+
+    this.networkService.sendMessage();
+    
+  }
   ngOnDestroy() {
     if (this.connectionSubscription) {
       this.connectionSubscription.unsubscribe();
