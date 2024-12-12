@@ -46,7 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Subscribe to online status changes
     this.onlineStatusSubscription = this.networkService.onlineStatus$.subscribe(status => {
-      this.isOnline = status.isOnline;
+      this.isOnline = status;
       this.navigatorIsOnlineLogs.push(status);
 
 
