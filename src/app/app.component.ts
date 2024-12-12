@@ -27,6 +27,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private connectionSubscription!: Subscription;
   private onlineStatusSubscription!: Subscription;
   private networkTypeSubscription!: Subscription;
+  navigatorIsOnlineLogs: any=[]
+  webSocketLogs: any=[]
 
   constructor(private networkService: TestingService) { }
 
@@ -46,7 +48,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.onlineStatusSubscription = this.networkService.onlineStatus$.subscribe(status => {
       this.isOnline = status.isOnline;
       this.currentIP = status.ip;
-
+      this.navigatorIsOnlineLogs=status;
+      
       if (!this.isOnline) {
         this.ipChangeMessage = 'You are offline.';
       } else if (this.previousIP && this.currentIP && this.previousIP !== this.currentIP) {
@@ -60,8 +63,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Subscribe to WebSocket connection status
     this.connectionSubscription = this.networkService.getConnectionStatus().subscribe(status => {
       this.isConnected = status;
-      this.temparray.push(status);
-console.log(status);
+      this.webSocketLogs.push(status);
 
 
       if (this.isConnected) {
