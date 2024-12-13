@@ -78,7 +78,7 @@ export class TestingService {
   }
 
   private calculateRetryDelay(): number {
-    return this.retryDelay * Math.pow(2, this.retryAttempts); // Exponential backoff
+    return this.retryDelay * this.retryAttempts; // Exponential backoff 
   }
 
   // Emit network type updates
