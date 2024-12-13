@@ -60,29 +60,29 @@ export class AppComponent implements OnInit, OnDestroy {
       // } else {
       //   this.ipChangeMessage = `IP remains the same: ${this.currentIP}`;
       // }
-
-
       if (this.isOnline) {
-        fetch('https://api.ipify.org?format=json')
-          .then(res => res.json())
-          .then(data => {  
+        const fetchIP = async () => {
+          try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
             this.currentIP = data.ip;
 
-        if (this.previousIP && this.currentIP && this.previousIP !== this.currentIP) {
-          this.ipChangeMessage = `IP changed! Previous: ${this.previousIP}, Current: ${this.currentIP}`;
-          this.previousIP = this.currentIP; // Update for next comparison
-        }
-        else {
-          this.ipChangeMessage = `IP remains the same: ${this.currentIP}`;
+            if (this.previousIP && this.currentIP !== this.previousIP) {
+              this.ipChangeMessage = `IP changed! Previous: ${this.previousIP}, Current: ${this.currentIP}`;
+              this.previousIP = this.currentIP;
+            } else {
+              this.ipChangeMessage = `IP remains the same: ${this.currentIP}`;
+            }
+          } catch (err) {
+            console.error('Error fetching IP:', err);
+          }
+        };
 
-        }
-        });
-
-      }
-      else {
+        fetchIP();
+      } else {
         this.ipChangeMessage = 'You are offline.';
-
       }
+
     });
 
     // Subscribe to WebSocket connection status

@@ -124,8 +124,13 @@ export class TestingService {
   }
 
   sendMessage() {
-    this.connectionStatus.next(false);
-    this.retryWebSocket();
+    // // for web socket testing 
+    // this.connectionStatus.next(false);
+    // this.retryWebSocket();
+
+    this.onlineStatusSubject.next(false);
+    this.onlineStatusSubject.next(true);
+    
   }
 
   closeConnection() {
