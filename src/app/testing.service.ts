@@ -6,7 +6,7 @@ import { BehaviorSubject, Subject, timer } from 'rxjs';
   providedIn: 'root'
 })
 export class TestingService {
-  private connection = (navigator as any).connection || null; // Browser Network Information API
+  private connection = (navigator as any).connection || null;
   private networkTypeSubject = new BehaviorSubject<string>(this.getCurrentNetworkType());
   private onlineStatusSubject = new BehaviorSubject<any>({
     isOnline: navigator.onLine,
@@ -15,85 +15,78 @@ export class TestingService {
   private socket$!: WebSocketSubject<any>;
   private connectionStatus = new Subject<boolean>();
   private heartbeatInterval: any;
-  private readonly maxRetries = 10;
-  private readonly retryDelay = 2000; // Base retry delay in ms
+  private maxRetries = 10;
+  private retryDelay = 2000; // Initial retry delay in ms
   private retryAttempts = 0;
-  private isRetrying = false;
+  private isRetrying = false; // Tracks if a retry is in progress
 
   constructor() {
-    this.initializeWebSocket();
+    this.connectWebSocket();
     this.updateOnlineStatus();
 
-    // Monitor online/offline events
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
 
-    // Monitor network type changes
     if (this.connection) {
       this.connection.addEventListener('change', () => this.updateNetworkType());
     }
   }
 
-  // Initialize WebSocket
-  private initializeWebSocket(): void {
-    const url = 'wss://websocket-testing-4ovk.onrender.com';
+  private connectWebSocket(): void {
+    const url = 'https://websocket-testing-4ovk.onrender.com';
 
     this.socket$ = webSocket({
       url: url,
       openObserver: {
         next: () => {
           this.connectionStatus.next(true);
-          this.retryAttempts = 0;
-          this.isRetrying = false;
+          this.retryAttempts = 0; // Reset retries on successful connection
+          this.isRetrying = false; // Clear retrying flag
           clearInterval(this.heartbeatInterval);
-          console.log('WebSocket connection established.');
         },
       },
       closeObserver: {
         next: () => {
           this.connectionStatus.next(false);
-          this.scheduleWebSocketRetry();
-          console.log('WebSocket connection closed.');
+          this.retryWebSocket();
         },
       }
     });
 
     this.socket$.subscribe({
       error: () => {
-        console.error('WebSocket encountered an error.');
-        this.scheduleWebSocketRetry();
+        this.retryWebSocket(); // Retry on error
       }
     });
   }
 
-  // Retry WebSocket connection with exponential backoff
-  private scheduleWebSocketRetry(): void {
-    if (this.isRetrying || this.retryAttempts >= this.maxRetries) {
-      if (this.retryAttempts >= this.maxRetries) {
-        console.error('Max retry attempts reached. Unable to reconnect WebSocket.');
-      }
+  private retryWebSocket(): void {
+    if (this.isRetrying) {
+      return; // Prevent multiple retry attempts simultaneously
+    }
+
+    if (this.retryAttempts >= this.maxRetries) {
+      console.error('Max retry attempts reached. WebSocket connection failed.');
       return;
     }
 
-    this.isRetrying = true;
+    this.isRetrying = true; // Set retrying flag
     const delay = this.calculateRetryDelay();
-    console.log(`Retrying WebSocket in ${delay}ms (Attempt ${this.retryAttempts + 1}/${this.maxRetries}).`);
+    console.log(`Retrying WebSocket connection in ${delay}ms (Attempt ${this.retryAttempts + 1}/${this.maxRetries})`);
 
     timer(delay).subscribe(() => {
       this.retryAttempts++;
-      this.initializeWebSocket();
+      this.connectWebSocket();
     });
   }
 
-  // Calculate retry delay (exponential backoff)
   private calculateRetryDelay(): number {
-    return this.retryDelay * Math.pow(2, this.retryAttempts);
+    return this.retryDelay * Math.pow(2, this.retryAttempts); // Exponential backoff
   }
 
-  // Update the current network type
+  // Emit network type updates
   private updateNetworkType(): void {
     const networkType = this.getCurrentNetworkType();
-    console.log(`Network type changed to: ${networkType}`);
     this.networkTypeSubject.next(networkType);
   }
 
@@ -105,12 +98,11 @@ export class TestingService {
     return this.networkTypeSubject.asObservable();
   }
 
-  // Update online/offline status with public IP
+  // Emit online/offline status with public IP
   private async updateOnlineStatus(): Promise<void> {
     const isOnline = navigator.onLine;
-    const ip = isOnline ? await this.fetchPublicIP() : 'Unavailable';
-    console.log(`Network status: ${isOnline ? 'Online' : 'Offline'}, IP: ${ip}`);
-    this.onlineStatusSubject.next({ isOnline, ip });
+    // const ip = isOnline ? await this.fetchPublicIP() : '';
+    this.onlineStatusSubject.next(isOnline );
   }
 
   private async fetchPublicIP(): Promise<string> {
@@ -118,8 +110,7 @@ export class TestingService {
       const response = await fetch('https://api.ipify.org?format=json');
       const data = await response.json();
       return data.ip;
-    } catch (error) {
-      console.error('Failed to fetch public IP:', error);
+    } catch {
       return 'Unknown';
     }
   }
@@ -132,20 +123,18 @@ export class TestingService {
     return this.connectionStatus.asObservable();
   }
 
-  // WebSocket Testing Method
-  sendMessage(message: any): void {
-    if (this.socket$) {
-      console.log('Sending message via WebSocket:', message);
-      this.socket$.next(message);
-    } else {
-      console.error('WebSocket is not connected.');
-    }
+  sendMessage() {
+    // // for web socket testing 
+    // this.connectionStatus.next(false);
+    // this.retryWebSocket();
+
+    this.onlineStatusSubject.next(false);
+    this.onlineStatusSubject.next(true);
+    
   }
 
-  // Close WebSocket connection
-  closeWebSocketConnection(): void {
+  closeConnection() {
     if (this.socket$) {
-      console.log('Closing WebSocket connection.');
       this.socket$.complete();
     }
   }

@@ -121,7 +121,7 @@ export class AppComponent implements OnInit, OnDestroy {
   click() {
 
 
-    // this.networkService.sendMessage();
+    this.networkService.sendMessage();
 
   }
   ngOnDestroy() {
@@ -134,6 +134,6 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.networkTypeSubscription) {
       this.networkTypeSubscription.unsubscribe();
     }
-    // this.networkService.closeConnection();
+    this.networkService.closeConnection();
   }
 }
