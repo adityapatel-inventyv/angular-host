@@ -132,8 +132,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
   performTraceroute() {
 
-
-    fetch('https://websocket-testing-4ovk.onrender.com/traceroute?target=' + this.target).then(response => {
+    fetch('https://websocket-testing-4ovk.onrender.com/traceroute?target=' + this.target, {
+      method: 'GET',
+      headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+      }
+    }).then(response => {
       return response.json();
     }).then(data => {
       this.results = data;
