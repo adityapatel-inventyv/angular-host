@@ -1,27 +1,35 @@
-# AngularDemo
+Change of network detection 
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
+types of network changes possible
 
-## Development server
+For mobile 
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+mobile date to wifi 
+wifi to mobile data
+wifi to another wifi
+turn off wifi/ mobile data and turning back on 
 
-## Code scaffolding
+for destop or laptop
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Wi-Fi to Wired Ethernet
+Wired Ethernet to Wi-Fi
+Wi-Fi to Another Wi-Fi Network
+Disabling and Re-enabling Wi-Fi/Ethernet
 
-## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+ways to detect the change 
+using navigator.online and offline methods
+using web socket with onClose method 
+using web socket with heartbeat method to detect connection close 
+using navigator.connection.effectiveType (not supported for all browser,supports only chrome)
 
-## Running unit tests
+scenario for browser in destop :-
+    change detection using web socket 
+        in case of  change of internet and detect that change using web socket (not working for destop)
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+    change detection using navigator.online method 
+        when user turn off and turn on the ethernet and wifi and connect to same network back (working) 
+        when user turn off ethernet and then connect to wifi or visa versa (working)
+        when user is on wifi and then connected to ethernet while keeping the wifi still on in that scenario a soft handover happen and there is no break of internet connect  visa versa (not working)
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+scenario for browser in mobile:-

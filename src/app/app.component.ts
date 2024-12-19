@@ -30,6 +30,13 @@ export class AppComponent implements OnInit, OnDestroy {
   navigatorIsOnlineLogs: any = []
   webSocketLogs: any = []
 
+
+
+  target: string = '';
+  results: any[] = [];
+  errorMessage: string = '';
+
+
   constructor(private networkService: TestingService) { }
 
   ngOnInit() {
@@ -111,17 +118,28 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async fetchPublicIP(): Promise<any> {
-    
-   
-    
-  }
 
 
   click() {
 
 
     this.networkService.sendMessage();
+
+  }
+
+
+
+
+  performTraceroute() {
+
+
+    fetch('https://websocket-testing-4ovk.onrender.com?target=' + this.target).then(response => {
+      return response.json();
+    }).then(data => {
+      this.results = data;
+    }).catch(error => {
+      this.errorMessage = 'An error occurred while fetching the results.';
+    });
 
   }
   ngOnDestroy() {

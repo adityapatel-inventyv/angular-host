@@ -1,44 +1,63 @@
-<div class="container">
-  <h1>Network and IP Tracker</h1>
+<div class="main-wrapper">
+  <!-- Network and IP Tracker -->
+  <div class="container">
+    <h1>Network and IP Tracker</h1>
 
-  <!-- Network Type -->
-  <div class="status-box">
-    <p><strong>Current Network Type:</strong> {{ networkType }}</p>
-  </div>
+    <!-- Network Type -->
+    <div class="status-box">
+      <p><strong>Current Network Type:</strong> {{ networkType }}</p>
+    </div>
 
-  <!-- Online Status -->
-  <div class="status-box">
-    <h2>Status: {{ isOnline ? 'Online 🎉' : 'Offline ⚠️' }}</h2>
-  </div>
+    <!-- Online Status -->
+    <div class="status-box">
+      <h2>Status: {{ isOnline ? 'Online 🎉' : 'Offline ⚠️' }}</h2>
+    </div>
 
-  <!-- General IP Status -->
-  <div class="status-box">
-    <p><strong>IP Status:</strong> {{ ipChangeMessage }}</p>
-  </div>
+    <!-- General IP Status -->
+    <div class="status-box">
+      <p><strong>IP Status:</strong> {{ ipChangeMessage }}</p>
+    </div>
 
-  <!-- WebSocket IP Status -->
+    <!-- WebSocket Connection -->
+    <div class="status-box">
+      <h2>WebSocket Connection: {{ isConnected ? 'Connected ✅' : 'Disconnected ❌' }}</h2>
+    </div>
 
-
-  <!-- WebSocket Connection -->
-  <div class="status-box">
-    <h2>WebSocket Connection: {{ isConnected ? 'Connected ✅' : 'Disconnected ❌' }}</h2>
-  </div>
     <div class="status-box">
       <p><strong>WebSocket IP Status:</strong> {{ webSocketIPChangeMessage }}</p>
     </div>
+
+    <!-- Logs -->
+    <button type="button" (click)="click()">Click</button>
+
+    <pre>{{ webSocketLogs | json }}</pre>
+    <pre>{{ navigatorIsOnlineLogs | json }}</pre>
+  </div>
+
+  <!-- Traceroute with Geolocation -->
+  <div class="container traceroute-container">
+    <h1>Traceroute with Geolocation</h1>
+    <div>
+      <input type="text" [(ngModel)]="target" placeholder="Enter a domain or IP" class="input-field" />
+      <button (click)="performTraceroute()">Start Traceroute</button>
+    </div>
+
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+    <div *ngIf="results.length > 0" class="results">
+      <h2>Traceroute Results</h2>
+      <div *ngFor="let hop of results" class="hop">
+        <p><strong>Hop {{ hop.hop }}</strong></p>
+        <p>IP Address: {{ hop.ip || 'Unknown' }}</p>
+        <p>
+          Location:
+          {{
+          hop.location
+          ? hop.location.city + ', ' + hop.location.region + ', ' + hop.location.country
+          : 'Unknown'
+          }}
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
-
-
-<button type="button" (click)="click()"> click</button>
-
-webSocketLogs 
-
-<pre>
-  {{ webSocketLogs | json }}
-</pre>
-
-navigatorIsOnlineLogs
-
-<pre>
-  {{ navigatorIsOnlineLogs | json }}
-</pre>
