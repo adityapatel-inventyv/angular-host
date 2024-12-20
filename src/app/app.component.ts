@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TestingService } from './testing.service';
 import { Subscription } from 'rxjs';
+import axios from 'axios';
 
 @Component({
   selector: 'app-root',
@@ -35,7 +36,7 @@ export class AppComponent implements OnInit, OnDestroy {
   target: string = '';
   results: any[] = [];
   errorMessage: string = '';
-
+ips:any
 
   constructor(private networkService: TestingService) { }
 
@@ -132,21 +133,108 @@ export class AppComponent implements OnInit, OnDestroy {
 
   performTraceroute() {
 
-    fetch('https://websocket-testing-4ovk.onrender.com/traceroute?target=' + this.target, {
-      method: 'GET',
-      headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-      }
-    }).then(response => {
+    fetch("https://api.ipify.org?format=json").then(response => {
       return response.json();
     }).then(data => {
-      this.results = data;
-    }).catch(error => {
-      this.errorMessage = 'An error occurred while fetching the results.';
-    });
+      this.target = data.ip
+
+if(this.ips){
+  this.target = this.ips
+}
+
+      fetch('http://54.91.188.85:3000/traceroute?target=' + this.target, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        response.text().then(async(text) => {
+          console.log(text);
+          
+          const ipList = this.parseTraceroute(text);
+          this.results = await this.temp(ipList)
+          console.log(this.results);
+          
+          
+          
+
+          
+        }).catch(error => {
+          this.errorMessage = 'An error occurred while parsing the results.';
+        });
+
+      }).catch(error => {
+        this.errorMessage = 'An error occurred while fetching the results.';
+      });
+      // fetch('http://54.91.188.85:3000/traceroute?target=' + this.target, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // }).then(response => {
+      //   return response.json();
+      // }).then(data => {
+      //   this.results = data;
+
+      //   console.log(this.results);
+        
+      // }).catch(error => {
+      //   this.errorMessage = 'An error occurred while fetching the results.';
+      // });
+    } ).catch(error => {
+      this.errorMessage = 'An error occurred while fetching the target IP.';
+    })
+
+   
 
   }
+
+  async temp(ipList:any){
+const data:any =[]
+    const locationPromises =ipList.map(async (hop: any) => {
+      try {
+        const response = await axios.get(`https://freeipapi.com/api/json/${hop}`);
+
+        data.push( {
+          ip: response.data.ipAddress || "Unknown",
+          city: response.data.cityName || "Unknown",
+          region: response.data.regionName || "Unknown",
+          country: response.data.countryName || "Unknown",
+        })
+      } catch (error) {
+        data.push({
+          ip: "unknown",
+          city: "Unknown",
+          region: "Unknown",
+          country: "Unknown",
+        })
+      }
+    });
+    await Promise.all(locationPromises);
+    return data
+
+  }
+
+parseTraceroute(tracerouteOutput: string) {
+  // Regular expression to match IP addresses
+  // This will match IPv4 addresses that are not in parentheses
+  const ipPattern = /(?<![\(\d])(?:\d{1,3}\.){3}\d{1,3}(?![\)\d])/g;
+
+  // Split the output into lines and process each line
+  const ipAddresses = tracerouteOutput
+    .split('\n')
+    .filter((line: string) => line.trim())  // Remove empty lines
+    .flatMap((line: string) => {
+      // Find all IP addresses in the current line
+      return line.match(ipPattern) || [];
+    });
+
+  // Remove duplicates while preserving order
+  const uniqueIps = [...new Set(ipAddresses)];
+
+  return uniqueIps;
+}
+
   ngOnDestroy() {
     if (this.connectionSubscription) {
       this.connectionSubscription.unsubscribe();

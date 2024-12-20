@@ -38,7 +38,7 @@
   <div class="container traceroute-container">
     <h1>Traceroute with Geolocation</h1>
     <div>
-      <input type="text" [(ngModel)]="target" placeholder="Enter a domain or IP" class="input-field" />
+      <input type="text" placeholder="Enter a domain or IP" class="input-field" [(ngModel)]="ips" />
       <button (click)="performTraceroute()">Start Traceroute</button>
     </div>
 
@@ -46,15 +46,15 @@
 
     <div *ngIf="results.length > 0" class="results">
       <h2>Traceroute Results</h2>
-      <div *ngFor="let hop of results" class="hop">
-        <p><strong>Hop {{ hop.hop }}</strong></p>
+      <div *ngFor="let hop of results let i = index" class="hop">
+        <p><strong>Hop {{ i+1 }}</strong></p>
         <p>IP Address: {{ hop.ip || 'Unknown' }}</p>
         <p>
           Location:
           {{
-          hop.location
-          ? hop.location.city + ', ' + hop.location.region + ', ' + hop.location.country
-          : 'Unknown'
+          
+          hop.city + ', ' + hop.region + ', ' + hop.country
+          
           }}
         </p>
       </div>
