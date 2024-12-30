@@ -2,6 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TestingService } from './testing.service';
 import { Subscription } from 'rxjs';
 import axios from 'axios';
+import * as L from 'leaflet';
+import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-root',
@@ -32,15 +35,33 @@ export class AppComponent implements OnInit, OnDestroy {
   webSocketLogs: any = []
 
 
+public  ipAddresses: any[] = [];
+  private map!: L.Map;
+  private markers: L.Marker[] = [];
+
 
   target: string = '';
   results: any[] = [];
   errorMessage: string = '';
 ips:any
 
-  constructor(private networkService: TestingService) { }
+
+pc:any
+  constructor(private networkService: TestingService,private http: HttpClient) { }
 
   ngOnInit() {
+
+    fetch('https://websocket-testing-4ovk.onrender.com/health-check').then(response => {
+      response.json().then(data => {
+        console.log(data);
+        
+      })
+      
+    })
+
+    this.initMap();
+    this.getPublicIP();
+
     // Fetch initial IP
     fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
@@ -124,7 +145,8 @@ ips:any
   click() {
 
 
-    this.networkService.sendMessage();
+    // this.networkService.sendMessage();
+    console.log(this.pc)
 
   }
 
@@ -141,7 +163,7 @@ ips:any
 if(this.ips){
   this.target = this.ips
 }
-
+      // http://54.91.188.85:3000/traceroute?target=
       fetch('http://54.91.188.85:3000/traceroute?target=' + this.target, {
         method: 'GET',
         headers: {
@@ -151,14 +173,10 @@ if(this.ips){
         response.text().then(async(text) => {
           console.log(text);
           
-          const ipList = this.parseTraceroute(text);
+          const ipList = this.parseTraceroute(text);     
           this.results = await this.temp(ipList)
+          this.plotIPAddresses();
           console.log(this.results);
-          
-          
-          
-
-          
         }).catch(error => {
           this.errorMessage = 'An error occurred while parsing the results.';
         });
@@ -189,12 +207,37 @@ if(this.ips){
 
   }
 
+  private initMap(): void {
+    this.map = L.map('map').setView([0, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+  }
+
+  private async plotIPAddresses() {
+    console.log(this.ipAddresses);
+    for (const ip of this.ipAddresses) {
+      
+  
+
+        if (ip.latitude && ip.longitude) {
+          const marker = L.marker([ip.latitude, ip.longitude])
+            .bindPopup(`IP: ${ip}<br>Location: ${ip.city}, ${ip.country_name}`)
+            .addTo(this.map);
+
+          this.markers.push(marker);
+        }
+  
+    }
+  }
+
   async temp(ipList:any){
 const data:any =[]
     const locationPromises =ipList.map(async (hop: any) => {
       try {
         const response = await axios.get(`https://freeipapi.com/api/json/${hop}`);
-
+        this.ipAddresses.push(response.data);
         data.push( {
           ip: response.data.ipAddress || "Unknown",
           city: response.data.cityName || "Unknown",
@@ -218,21 +261,52 @@ const data:any =[]
 parseTraceroute(tracerouteOutput: string) {
   // Regular expression to match IP addresses
   // This will match IPv4 addresses that are not in parentheses
-  const ipPattern = /(?<![\(\d])(?:\d{1,3}\.){3}\d{1,3}(?![\)\d])/g;
+  // const ipPattern = /(?<![\(\d])(?:\d{1,3}\.){3}\d{1,3}(?![\)\d])/g;
+  const ipPattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b|\((?:\d{1,3}\.){3}\d{1,3}\)/g;
+;
+  
 
   // Split the output into lines and process each line
-  const ipAddresses = tracerouteOutput
+  const ipAddressestemp = tracerouteOutput
     .split('\n')
     .filter((line: string) => line.trim())  // Remove empty lines
     .flatMap((line: string) => {
       // Find all IP addresses in the current line
-      return line.match(ipPattern) || [];
+
+      const matches = line.match(ipPattern) || [];
+      // Remove brackets from each IP
+      return matches.map(ip => ip.replace(/[()]/g, ''));
     });
 
   // Remove duplicates while preserving order
-  const uniqueIps = [...new Set(ipAddresses)];
-
+  const uniqueIps = [...new Set(ipAddressestemp)];
   return uniqueIps;
+}
+
+async  getPublicIP() {
+  const server = 'stun:stun.l.google.com:19302'; // Define the server variable
+  this.pc = new RTCPeerConnection({ iceServers:[{ urls: 'stun:stun.l.google.com:19302' }], });
+  this.pc.createDataChannel(""); // Create a dummy data channel
+  this.pc.oniceconnectionstatechange = () => {
+    console.log(`Connection state for ${server}: ${this.pc.iceConnectionState}`);
+    if (this.pc.iceConnectionState === "failed" || this.pc.iceConnectionState === "disconnected") {
+      console.log(`Potential issue with ${server}`);
+    }
+    this.pc.close();
+  };
+  this.pc.onicecandidate = (event:any) => {
+    if (event.candidate) {
+      
+      const candidate = event.candidate.candidate;
+      const match = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+      if (match) {
+        console.log("Public IP Address:", match[1]);
+        // pc.close();
+      }
+    }
+  };
+
+  await this.pc.createOffer().then((offer:any) => this.pc.setLocalDescription(offer));
 }
 
   ngOnDestroy() {

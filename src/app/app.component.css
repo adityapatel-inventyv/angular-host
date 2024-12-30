@@ -246,3 +246,9 @@ pre {
 .traceroute-container::-webkit-scrollbar-thumb:hover {
     background-color: rgba(66, 153, 225, 0.8);
 }
+
+#map {
+    height: 500px;
+    width: 100%;
+    margin: 20px 0;
+}

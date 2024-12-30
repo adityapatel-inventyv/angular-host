@@ -21,9 +21,8 @@ export class TestingService {
   constructor() {
     this.connectWebSocket();
     this.updateOnlineStatus();
-
-    window.addEventListener('online', this.updateOnlineStatus.bind(this));
-    window.addEventListener('offline', this.updateOnlineStatus.bind(this));
+    window.addEventListener('online', () => this.updateOnlineStatus());
+    window.addEventListener('offline', () => this.updateOnlineStatus());
 
     if (this.connection) {
       this.connection.addEventListener('change', () => this.updateNetworkType());
