@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import axios from 'axios';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
-
+import  html2canvas  from 'html2canvas';
 
 @Component({
   selector: 'app-root',
@@ -49,15 +49,40 @@ ips:any
 pc:any
   constructor(private networkService: TestingService,private http: HttpClient) { }
 
+
+  ngAfterViewInit(){
+
+    
+    setTimeout(() => {
+      const element = document.getElementById('network');
+      console.log(element);
+      if (element) {
+
+        html2canvas(element).then((canvas: any) => {
+          document.body.appendChild(canvas);
+        });
+      } else {
+        console.error('Element with id "network" not found.');
+      }
+    }, 5000);
+    
+  }
   ngOnInit() {
+
 
     fetch('https://websocket-testing-4ovk.onrender.com/health-check').then(response => {
       response.json().then(data => {
         console.log(data);
         
+      }).catch(error => {
+
+        console.log(error);
+        
       })
       
     })
+
+    https://websocket-testing-4ovk.onrender.com/health-check
 
     this.initMap();
     this.getPublicIP();
@@ -164,7 +189,7 @@ if(this.ips){
   this.target = this.ips
 }
       // http://54.91.188.85:3000/traceroute?target=
-      fetch('http://54.91.188.85:3000/traceroute?target=' + this.target, {
+      fetch('http://localhost:3000/traceroute?target=' + this.target, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -295,6 +320,8 @@ async  getPublicIP() {
     this.pc.close();
   };
   this.pc.onicecandidate = (event:any) => {
+    console.log(event);
+    
     if (event.candidate) {
       
       const candidate = event.candidate.candidate;
@@ -305,6 +332,12 @@ async  getPublicIP() {
       }
     }
   };
+
+
+  this.pc.addEventListener("icecandidateerror", (event: any) => {
+    console.error("ICE Candidate Error Event:", event);
+  });
+
 
   await this.pc.createOffer().then((offer:any) => this.pc.setLocalDescription(offer));
 }

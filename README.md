@@ -13,6 +13,9 @@
 - Wi-Fi to another Wi-Fi network
 - Disabling and re-enabling Wi-Fi/Ethernet
 
+### edge cases
+- connection using vpn might sometimes give false positive or negative  and also same scenarios for virtual box (need to check)
+
 ## Ways to Detect the Change
 - Using `navigator.online` and `offline` methods (Note: This may result in false positives or false negatives in some scenarios and may vary depending on the browser. There may also be delays.)
 - Using WebSocket with `onClose` method
@@ -43,3 +46,4 @@
 
 ## Trace Route 
 There is no available package for this due to the low-level code required to achieve this in a browser. It is not possible to implement this in a browser due to privacy reasons.
+j
