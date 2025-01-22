@@ -5,6 +5,8 @@ import axios from 'axios';
 import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import  html2canvas  from 'html2canvas';
+import { Network } from '@capacitor/network';
+
 
 @Component({
   selector: 'app-root',
@@ -43,10 +45,13 @@ public  ipAddresses: any[] = [];
   target: string = '';
   results: any[] = [];
   errorMessage: string = '';
-ips:any
+  ips:any
+  pc:any
 
-
-pc:any
+  networkState: string = 'Unknown';
+  private networkChangeSubscription!: Subscription;
+  
+  tempstatus: any;
   constructor(private networkService: TestingService,private http: HttpClient) { }
 
 
@@ -65,10 +70,20 @@ pc:any
         console.error('Element with id "network" not found.');
       }
     }, 5000);
-    
+    ``
   }
   ngOnInit() {
 
+
+    Network.addListener('networkStatusChange', status => {
+      this.tempstatus = status
+    })
+    this.networkChangeSubscription = this.networkService.networkChange$.subscribe(
+      (state) => {
+        this.networkState = state;
+        console.log('Network state updated:', state);
+      }
+    );
 
     fetch('https://websocket-testing-4ovk.onrender.com/health-check').then(response => {
       response.json().then(data => {

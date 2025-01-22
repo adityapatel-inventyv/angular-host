@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 
 @Injectable({
@@ -17,8 +17,12 @@ export class TestingService {
   private retryDelay = 2000; // Initial retry delay in ms
   private retryAttempts = 0;
   private isRetrying = false; // Tracks if a retry is in progress
+  private peerConnection!: RTCPeerConnection;
+  private networkChangeSubject = new BehaviorSubject<string>('Unknown');
+  networkChange$ = this.networkChangeSubject.asObservable();
 
-  constructor() {
+  constructor(private ngZone: NgZone) {
+    this.initWebRTC();
     this.connectWebSocket();
     this.updateOnlineStatus();
     window.addEventListener('online', () => this.updateOnlineStatus());
@@ -27,6 +31,35 @@ export class TestingService {
     if (this.connection) {
       this.connection.addEventListener('change', () => this.updateNetworkType());
     }
+  }
+
+  private initWebRTC() {
+    try {
+      this.peerConnection = new RTCPeerConnection();
+
+      // Monitor ICE connection state changes
+      this.peerConnection.addEventListener('iceconnectionstatechange', () => {
+        
+          const state = this.peerConnection.iceConnectionState;
+          console.log('ICE Connection State Changed:', state);
+          this.networkChangeSubject.next(state);
+      });
+
+      // Create a dummy data channel to keep the connection alive
+      const dataChannel = this.peerConnection.createDataChannel('dummy');
+      dataChannel.close();
+
+      // Create an offer to initialize the WebRTC connection
+      this.peerConnection.createOffer()
+        .then((offer) => this.peerConnection.setLocalDescription(offer))
+        .catch((error) => console.error('Error creating offer:', error));
+    } catch (error) {
+      console.error('Failed to initialize WebRTC:', error);
+    }
+  }
+
+  get currentNetworkState(): string {
+    return this.networkChangeSubject.value;
   }
 
   private connectWebSocket(): void {
