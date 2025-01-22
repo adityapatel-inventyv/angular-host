@@ -33,9 +33,10 @@ self.addEventListener('activate', event => {
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', event => {
     console.log('[Service Worker] Fetching:', event.request.url);
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request);
-        })
-    );
+    fetch(event.request).then(response => {
+        console.log('response', response);
+    }).catch(err => {
+        console.log('fetch error', err);
+        console.error('Request Headers:', [...event.request.headers.entries()]);
+    });
 });
