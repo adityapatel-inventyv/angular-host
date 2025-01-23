@@ -1,8 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TestingService } from './testing.service';
 import { Subscription } from 'rxjs';
-import axios from 'axios';
-import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import html2canvas from 'html2canvas';
 import { Network } from '@capacitor/network';
@@ -64,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
     Network.addListener('networkStatusChange', status => {
+      console.log('Network status changed', status);
       this.tempstatus = status
     });
 
