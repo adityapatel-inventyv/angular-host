@@ -35,38 +35,7 @@
   </div>
 
   <!-- Traceroute with Geolocation -->
-  <div class="container traceroute-container">
-    <h1>Traceroute with Geolocation</h1>
-    <div>
-      <input type="text" placeholder="Enter a domain or IP" class="input-field" [(ngModel)]="ips" />
-      <button (click)="performTraceroute()">Start Traceroute</button>
-    </div>
+  <app-traceroute></app-traceroute>
 
-    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-
-    <div *ngIf="results.length > 0" class="results">
-      <h2>Traceroute Results</h2>
-      <div *ngFor="let hop of results let i = index" class="hop">
-        <p><strong>Hop {{ i+1 }}</strong></p>
-        <p>IP Address: {{ hop.ip || 'Unknown' }}</p>
-        <p>
-          Location:
-          {{
-          
-          hop.city + ', ' + hop.region + ', ' + hop.country
-          
-          }}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-    <div>
-      <h3>Network Status</h3>
-      <p>Current State: {{ networkState }}</p>
-    </div>
-
-    status form capacitor lib{{tempstatus |json}}
-<div id="map"></div>
+  status form capacitor lib{{tempstatus |json}}
+  <div id="map"></div>

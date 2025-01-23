@@ -39,10 +39,10 @@ export class TestingService {
 
       // Monitor ICE connection state changes
       this.peerConnection.addEventListener('iceconnectionstatechange', () => {
-        
-          const state = this.peerConnection.iceConnectionState;
-          console.log('ICE Connection State Changed:', state);
-          this.networkChangeSubject.next(state);
+
+        const state = this.peerConnection.iceConnectionState;
+        console.log('ICE Connection State Changed:', state);
+        this.networkChangeSubject.next(state);
       });
 
       // Create a dummy data channel to keep the connection alive
@@ -131,16 +131,6 @@ export class TestingService {
   private async updateOnlineStatus(): Promise<void> {
     const isOnline = navigator.onLine;
     this.onlineStatusSubject.next(isOnline);
-  }
-
-  private async fetchPublicIP(): Promise<string> {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip;
-    } catch {
-      return 'Unknown';
-    }
   }
 
   get onlineStatus$() {
