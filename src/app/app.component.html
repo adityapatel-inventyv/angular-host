@@ -35,9 +35,34 @@
   </div>
 
   <!-- Traceroute with Geolocation -->
-  <app-traceroute ></app-traceroute>
-<div class="container" style="height: 100px;">
+  <div>
+    <app-traceroute></app-traceroute>
+  </div>
 
-  status form capacitor lib:{{tempstatus |json}}
-</div>
+  <div style="height: auto;">
+    <app-web-worker></app-web-worker>
+
+  </div>
+  
+
   <div id="map"></div>
+
+
+  <!-- code for webrtc communication  -->
+  <!-- <app-remote></app-remote>
+  <app-web-rtc></app-web-rtc> -->
+</div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="basePrice">Base Price:</label>
+      <input id="basePrice" formControlName="basePrice" type="number" [ngClass]="{'error': form.get('basePrice')?.invalid && form.get('basePrice')?.touched}" />
+    </div>
+  {{showHide()}}
+    <div>
+      <p>Discount Percentage: {{ discountPercentage() }}%</p>
+      <p>Discount Amount: ${{ discountAmount() }}</p>
+      <p>Final Price: ${{ finalPrice() }}</p>
+    </div>
+    <button type="submit">submit</button>
+  </form>

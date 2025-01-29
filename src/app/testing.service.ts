@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, signal } from '@angular/core';
 import { BehaviorSubject, Subject, timer } from 'rxjs';
 
 @Injectable({
@@ -20,6 +20,7 @@ export class TestingService {
   private peerConnection!: RTCPeerConnection;
   private networkChangeSubject = new BehaviorSubject<string>('Unknown');
   networkChange$ = this.networkChangeSubject.asObservable();
+  isMember = signal(false); // Membership status
 
   constructor(private ngZone: NgZone) {
     this.initWebRTC();
@@ -155,5 +156,13 @@ export class TestingService {
       this.websocket.close();
       console.log('WebSocket connection closed.');
     }
+  }
+
+  toggleMembership() {
+    this.isMember.set(!this.isMember());
+  }
+
+  get getIsMember() {
+    return this.isMember;
   }
 }

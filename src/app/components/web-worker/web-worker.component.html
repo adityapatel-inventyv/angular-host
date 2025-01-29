@@ -1,0 +1,11 @@
+<div class="container traceroute-container">
+    <h1>Internet Speed Test</h1>
+    <div>
+            <p><strong>Status:</strong> {{ status }}</p>
+            <p><strong>Download Speed using web worker:</strong> {{ downloadSpeed }} Mbps</p>
+      <p><strong>Latency from service worker:</strong> {{ latency }} ms</p>
+
+        <button (click)="terminate()">terminate web worker</button>
+
+    </div>
+</div>

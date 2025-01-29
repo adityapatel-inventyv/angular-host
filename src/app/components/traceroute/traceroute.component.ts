@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import axios from 'axios';
 import * as L from 'leaflet';
+import { TestingService } from '../../testing.service';
 
 @Component({
   selector: 'app-traceroute',
@@ -15,6 +16,10 @@ export class TracerouteComponent {
   public ipAddresses: any[] = [];
   private map!: L.Map;
   private markers: L.Marker[] = [];
+  isMember = this.networkService.getIsMember
+
+
+constructor(private networkService:TestingService) { }
 
   performTraceroute() {
 
@@ -122,5 +127,10 @@ export class TracerouteComponent {
 
   ngOnInit() {
     this.initMap();
+  }
+
+  // Toggle membership status
+  toggleMembership() {
+    this.networkService.toggleMembership();
   }
 }

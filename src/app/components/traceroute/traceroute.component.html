@@ -17,3 +17,9 @@
         </div>
     </div>
 </div>
+
+    <div>
+        <label for="isMember">Membership:</label>
+        <input id="isMember" type="checkbox" [checked]="isMember()" (change)="toggleMembership()" />
+        <span>{{ isMember() ? 'Member' : 'Non-member' }}</span>
+    </div>

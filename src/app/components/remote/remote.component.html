@@ -1,0 +1,7 @@
+<div>
+    <h2>Remote</h2>
+    <textarea placeholder="Paste host SDP here" [(ngModel)]="offer"></textarea>
+    <button (click)="setOffer()">Set Offer</button>
+    <textarea placeholder="Answer SDP" readonly>{{ answer }}</textarea>
+    <video autoplay playsinline></video>
+</div>

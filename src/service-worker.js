@@ -32,11 +32,46 @@ self.addEventListener('activate', event => {
 
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', event => {
-    console.log('[Service Worker] Fetching:', event.request.url);
-    fetch(event.request).then(response => {
-        console.log('response', response);
-    }).catch(err => {
-        console.log('fetch error', err);
-        console.error('Request Headers:', [...event.request.headers.entries()]);
-    });
+    const startTime = performance.now();
+    // console.log('[Service Worker] Fetching:', event.request.url);
+
+    event.respondWith(
+        fetch(event.request).then(response => {
+            const endTime = performance.now();
+            const latency = endTime - startTime;
+            // console.log('response', response);
+            // console.log('Latency:', latency.toFixed(2), 'ms');
+
+            // Send latency to main thread
+            self.clients.matchAll().then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({
+                        type: 'FETCH_LATENCY',
+                        url: event.request.url,
+                        latency: latency.toFixed(2)
+                    });
+                });
+            });
+
+            return response;
+        }).catch(err => {
+            const endTime = performance.now();
+            const latency = endTime - startTime;
+            console.log('fetch error', err);
+            console.error('Request Headers:', [...event.request.headers.entries()]);
+
+            // Send latency to main thread
+            // self.clients.matchAll().then(clients => {
+            //     clients.forEach(client => {
+            //         client.postMessage({
+            //             type: 'FETCH_LATENCY',
+            //             url: event.request.url,
+            //             latency: latency.toFixed(2)
+            //         });
+            //     });
+            // });
+
+            throw err;
+        })
+    );
 });

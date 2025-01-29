@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { TestingService } from './testing.service';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import html2canvas from 'html2canvas';
 import { Network } from '@capacitor/network';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 
 @Component({
@@ -38,7 +39,12 @@ export class AppComponent implements OnInit, OnDestroy {
   networkState: string = 'Unknown'
 
   tempstatus: any;
-  constructor(private networkService: TestingService, private http: HttpClient) { }
+  constructor(private networkService: TestingService, private http: HttpClient, private fb: FormBuilder) {
+
+    this.form = this.fb.group({
+      basePrice: [this.basePrice(), Validators.required],
+    });
+   }
 
 
   ngAfterViewInit() {
@@ -46,7 +52,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     setTimeout(() => {
       const element = document.getElementById('network');
-      console.log(element);
       if (element) {
 
         html2canvas(element).then((canvas: any) => {
@@ -67,9 +72,8 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     fetch('https://websocket-testing-4ovk.onrender.com/health-check').then(response => {
+      
       response.json().then(data => {
-        console.log(data);
-
       }).catch(error => {
 
         console.log(error);
@@ -193,8 +197,6 @@ export class AppComponent implements OnInit, OnDestroy {
       this.pc.close();
     };
     this.pc.onicecandidate = (event: any) => {
-      console.log(event);
-
       if (event.candidate) {
 
         const candidate = event.candidate.candidate;
@@ -226,5 +228,54 @@ export class AppComponent implements OnInit, OnDestroy {
       this.networkTypeSubscription.unsubscribe();
     }
     this.networkService.closeConnection();
+  }
+
+
+  form: FormGroup;
+
+  // Signals
+  basePrice = signal(100); // Default base price
+  isMember = this.networkService.getIsMember
+
+  // First-level computed signal: Discount percentage
+  discountPercentage = computed(() => {
+    
+    return this.isMember() ? 10 : 5; // Members get a higher discount
+  });
+
+  // Second-level computed signals:
+  discountAmount = computed(() => {
+    return (this.basePrice() * this.discountPercentage()) / 100;
+  });
+
+  showHide = computed(() => {
+    
+    if(this.isMember()){
+      this.form.get('basePrice')?.setValidators([Validators.required, Validators.min(100)]);
+    }else{
+      this.form.get('basePrice')?.setValidators([Validators.required, Validators.min(50)]);
+    }
+console.log(this.form.get('basePrice')?.invalid);
+
+    return this.isMember() ? 'Show' : 'Hide';
+  });
+
+  finalPrice = computed(() => {
+    return this.basePrice() - this.discountAmount();
+  });
+
+  onSubmit() {
+    console.log(this.form.value);
+  }
+
+  // Update base price when form control changes
+  updateBasePrice() {
+    const newPrice = this.form.get('basePrice')?.value;
+    this.basePrice.set(Number(newPrice || 0));
+  }
+
+  // Toggle membership status
+  toggleMembership() {
+    this.networkService.toggleMembership();
   }
 }
