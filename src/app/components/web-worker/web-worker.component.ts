@@ -9,15 +9,15 @@ export class WebWorkerComponent {
   private worker?: Worker;
   status: string = 'Waiting...';
   downloadSpeed: string = '-';
-  uploadSpeed: string = '-';
-  latency: any;
+  latency: string = '-';
+  speedTestResults: any = {}
 
   ngOnInit(): void {
     navigator.serviceWorker.addEventListener('message', event => {
       if (event.data && event.data.type === 'FETCH_LATENCY') {
 
         console.log(`Fetch latency for ${event.data.url}: ${event.data.latency} ms`);
-        this.latency= event.data.latency;
+        this.latency = event.data.latency;
         // You can add additional logic here to handle the latency data
       }
     });
@@ -27,16 +27,23 @@ export class WebWorkerComponent {
       this.worker = new Worker(new URL('./speed-test.worker.ts', import.meta.url));
 
       this.worker.onmessage = ({ data }) => {
-        const { status, downloadSpeed, latency } = data;
+        const { from, status, downloadSpeed, latency } = data;
 
-        this.status = status === 'slow' ? 'Slow Internet' : 'Normal Speed';
-        this.downloadSpeed = downloadSpeed;
-        this.uploadSpeed = latency;
+        if (from === 'auto') {
+          this.status = status === 'slow' ? 'Slow Internet' : 'Normal Speed';
+          this.downloadSpeed = downloadSpeed
+          this.latency = latency;
 
-        if (status === 'slow') {
-          console.warn('Slow internet detected!');
+          if (status === 'slow') {
+            console.warn('Slow internet detected!');
+          }
         }
-      };
+        else if (from === 'test') {
+
+          this.speedTestResults = data;
+          console.log("data", this.speedTestResults);
+        }
+      }
 
       // Start the speed test with a threshold of 5 Mbps
       this.worker.postMessage({
@@ -49,10 +56,18 @@ export class WebWorkerComponent {
     }
   }
 
-  terminate(){
+  terminate() {
     if (this.worker) {
       this.worker.terminate()
     }
+  }
+
+  start() {
+    this.worker?.postMessage({
+      action: 'speed-test',
+      threshold: 40,
+      interval: 5000, // Check every 5 seconds
+    });
   }
   ngOnDestroy(): void {
     // Terminate the worker when the component is destroyed

@@ -1,11 +1,21 @@
 <div class="container traceroute-container">
     <h1>Internet Speed Test</h1>
-    <div>
-            <p><strong>Status:</strong> {{ status }}</p>
-            <p><strong>Download Speed using web worker:</strong> {{ downloadSpeed }} Mbps</p>
-      <p><strong>Latency from service worker:</strong> {{ latency }} ms</p>
+    <div class="results">
+        <p style="font-size: 20px; font-weight:550; "> Result from auto check for internet speed for every 5 seconds</p>
+        <p>Status: {{ status }}</p>
+        <p>Download Speed using web worker: {{ downloadSpeed }} Mbps</p>
+        <p>Latency from service worker: {{ latency }} ms</p>
+    </div>
+    <div class="results">
 
-        <button (click)="terminate()">terminate web worker</button>
+        <p style="font-size: 20px; font-weight: bold; ">Result from speed test </p>
+        <p>Download Speed: {{ speedTestResults.downloadSpeed || 'N/A'}} </p>
+        <p>Upload Speed: {{ speedTestResults.uploadSpeed || 'N/A'}} </p>
+        <p>Latency: {{ speedTestResults.latency || 'N/A'}}</p>
+
+
+        <button (click)="terminate()" style="margin-right: 10px;">terminate web worker</button>
+        <button (click)="start()">Start speed test</button>
 
     </div>
 </div>

@@ -255,7 +255,6 @@ export class AppComponent implements OnInit, OnDestroy {
     }else{
       this.form.get('basePrice')?.setValidators([Validators.required, Validators.min(50)]);
     }
-console.log(this.form.get('basePrice')?.invalid);
 
     return this.isMember() ? 'Show' : 'Hide';
   });
