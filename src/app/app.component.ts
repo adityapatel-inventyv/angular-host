@@ -63,10 +63,21 @@ export class AppComponent implements OnInit, OnDestroy {
     }, 5000);
     ``
   }
-  ngOnInit() {
 
+ async ngOnInit() {
+   //need to add declare module '*.wasm' in src/assets/wasm.d.ts to use dynamic import statement
+    const exports = await import('../assets/add.wasm');
+    const { add_one: addOne } = exports;
+    console.log(addOne(100)); // Example usage
 
-    Network.addListener('networkStatusChange', status => {
+//    const response = await fetch('../assets/add.wasm');
+//    const buffer = await response.arrayBuffer();
+//    const wasmModule = await WebAssembly.instantiate(buffer, {});
+
+//    const { add_one: addOne } = wasmModule.instance.exports as { add_one: (arg: number) => number };
+//    console.log(addOne(10)); // Example usage
+
+  Network.addListener('networkStatusChange', status => {
       console.log('Network status changed', status);
       this.tempstatus = status
     });
